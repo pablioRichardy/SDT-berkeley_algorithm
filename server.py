@@ -1,7 +1,4 @@
-from ast import arg
-from http import client
-from pydoc import cli
-import socket, time, threading
+import socket, time, os
 
 times = [0]
 
@@ -18,18 +15,35 @@ def avarage(arr):
         total += arr[i]
     return total / int(len(arr))
 
-server.bind((socket.gethostbyname(socket.gethostname()), 5050))
+server.bind(('127.0.0.1', 5050))
 server.listen(3)
-
+refreshCLOCK = 0
+clientTIme = 0
 while True:
-        client, addr = server.accept()
-        print(f'[{addr[0]}] Connected.')
-        clients.append(client)
+    client, addr = server.accept()
+    clients.append(client)
+    #print(f'[{addr[0]}] Connected.')
+    clients.append(client)
+    ans = client.recv(2048).decode()
+    clientTIme = ans
+    times.append(serverTime - int(ans))
 
-        ans = client.recv(2048).decode()
-        times.append(serverTime - 650)
+    #print(times)
+    client.send(f'{int(avarage(times))}'.encode())
+    #print(avarage(times))
+    refreshCLOCK = int(avarage(times))
+    if not ans:
+        server.close()
+        break
+    break
+if(refreshCLOCK < 0):
+    refreshCLOCK = refreshCLOCK * -1
 
-        print(times)
-        client.send(f'{int(avarage(times))}'.encode())
-        print(avarage(times))
+clients[0].send(f'{(serverTime + refreshCLOCK) - int(clientTIme)}'.encode())
+#print(today.tm_min + (refreshCLOCK))
+
+os.system(f'time {today.tm_hour}:{today.tm_min + (refreshCLOCK)}:{00}')
+print(f'Novo horário do sistema é: {today.tm_hour}:{today.tm_min + (refreshCLOCK)}:{00}')
+server.close()
+
 
