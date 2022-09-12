@@ -6,6 +6,7 @@ times = []
 today = time.localtime()
 clientTime = (today.tm_hour * 60) + today.tm_min
 
+
 refreshClock = ''
 minutesNow = 0
 
@@ -14,13 +15,19 @@ client.connect(('127.0.0.1', 5050))
 
 while True:
     client.send(f'{clientTime}'.encode())
-    ans = client.recv(2048).decode()
     
-    refreshClock = int(ans)
+    ans = client.recv(2048).decode()
+    if ans != '':
+        refreshClock = int(ans)
     break
 
-#print(refreshClock)
-os.system(f'time {today.tm_hour}:{today.tm_min +refreshClock}:{00}')
+today = time.localtime()
+clientTime = (today.tm_hour * 60) + today.tm_min
+hours = today.tm_hour
+mins = (today.tm_min + refreshClock)
+if (today.tm_min + refreshClock) > 60 :
+    hours += 1
+    mins -= 60
 
-print(f'Novo horário do sistema é: {today.tm_hour}:{today.tm_min + refreshClock}:{00}')
+print(f'Novo horário do sistema é: {hours}:{mins}:{00}')
 client.close()
